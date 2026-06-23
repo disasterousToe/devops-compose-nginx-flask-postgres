@@ -13,6 +13,9 @@ services:
       db:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - frontend
+      - backend
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:5000/health')\""]
       interval: 10s
@@ -30,8 +33,10 @@ services:
       app:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - frontend
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost || exit 1"]
+      test: ["CMD-SHELL", "nginx -t || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -48,6 +53,8 @@ services:
     expose:
       - "5432"
     restart: unless-stopped
+    networks:
+      - backend
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
@@ -57,3 +64,7 @@ services:
 
 volumes:
   postgres_data:
+
+networks:
+  frontend:
+  backend:
